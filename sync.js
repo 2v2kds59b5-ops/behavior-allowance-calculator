@@ -6,8 +6,8 @@ var api=null,saveTimer=null,lastSaveReason='';
 function cfg(){
   var c=window.BEHAVIOR_ALLOWANCE_SYNC||{};
   return {
-    owner:c.owner||'',
-    repo:c.repo||'',
+    owner:c.owner||'2v2kds59b5-ops',
+    repo:c.repo||'behavior-allowance-calculator',
     branch:c.branch||'main',
     path:c.path||'data/behavior-data.json',
     readUrl:c.readUrl||'./data/behavior-data.json'
