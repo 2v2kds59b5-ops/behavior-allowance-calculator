@@ -1,5 +1,5 @@
 window.BEHAVIOR_ALLOWANCE_SYNC = {
-  owner: "REPLACE_WITH_GITHUB_USERNAME",
+  owner: "2v2kds59b5-ops",
   repo: "behavior-allowance-calculator",
   branch: "main",
   path: "data/behavior-data.json",
