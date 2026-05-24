@@ -23,7 +23,19 @@ function setMessage(message,type){
   el.innerHTML=message;
 }
 
+function setAdminMessage(message,type){
+  var el=byId('adminMsg'),cls=type==='success'?'success':(type==='error'?'err':'notice');
+  if(!el)return;
+  el.innerHTML='<div class="'+cls+'">'+message+'</div>';
+}
+
 function formatCount(n){return (Number(n)||0).toLocaleString('zh-CN')}
+
+function payloadSummary(payload){
+  var rows=payload&&Array.isArray(payload.rows)?payload.rows.length:0;
+  var cases=payload&&Array.isArray(payload.cases)?payload.cases.length:0;
+  return formatCount(rows)+' 条数据、'+formatCount(cases)+' 张图片';
+}
 
 function isGithubConfigured(){
   var c=cfg();
@@ -104,7 +116,7 @@ function loadRemote(){
       updatedAt=state.updatedAt||Date.now();
       if(api)api.setData(rows,updatedAt,true);
       if(api)api.setCases(cases,true);
-      setMessage('已读取线上数据：'+formatCount(rows.length)+' 条。','success');
+      setMessage('已读取线上数据：'+formatCount(rows.length)+' 条、'+formatCount(cases.length)+' 张图片。','success');
       updateFrontMessage(rows.length?'已读取线上数据，可以输入工号查询。':'线上暂无数据，请后台上传 Excel。',rows.length?'success':'notice');
     })
     .catch(function(err){
@@ -163,7 +175,7 @@ function buildPayload(){
 }
 
 function publishState(reason){
-  var c=cfg(),payload,message;
+  var c=cfg(),payload,message,summary;
   lastSaveReason=reason||lastSaveReason||'manual';
   if(!api)return;
   if(!isGithubConfigured()){
@@ -172,10 +184,12 @@ function publishState(reason){
   }
   if(!token()){
     setMessage('数据已保存在本机。要让朋友同步看到，请先填写并保存 GitHub 写入令牌。','notice');
+    setAdminMessage('数据已保存在本机。要同步表格和图片，请先填写并保存 GitHub 写入令牌。','notice');
     return;
   }
   payload=buildPayload();
-  message='更新行为津贴线上数据（'+formatCount(payload.rows.length)+' 条）';
+  summary=payloadSummary(payload);
+  message='更新行为津贴线上数据（'+summary+'）';
   setMessage('正在同步到 GitHub...', 'notice');
   readRemoteSha()
     .then(function(sha){
@@ -196,10 +210,12 @@ function publishState(reason){
       return res.json();
     })
     .then(function(){
-      setMessage('已同步 '+formatCount(payload.rows.length)+' 条数据到线上。GitHub Pages 通常几十秒后刷新，朋友重新打开即可看到。','success');
+      setMessage('已同步 '+summary+' 到线上。GitHub Pages 通常几十秒后刷新，朋友重新打开即可看到。','success');
+      setAdminMessage('已同步 '+summary+' 到线上。朋友刷新后即可看到最新表格和图片。','success');
     })
     .catch(function(err){
       setMessage('同步失败：'+err.message+'。请检查令牌权限、仓库名和分支。','error');
+      setAdminMessage('同步失败：'+err.message+'。请检查令牌权限、仓库名和分支。','error');
     });
 }
 
